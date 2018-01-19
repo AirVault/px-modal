@@ -143,18 +143,35 @@ Custom property | Description
         </div>
         <!-- Actions -->
         <div class="modal__triggers">
-          <!-- Actions: Reject -->
-          <div class="modal__reject-trigger" on-click="_handleRejectTriggerTapped">
-            <slot name="reject-trigger">
-              <button type="button" class="btn" id="reject-trigger-button">[[rejectText]]</button>
-            </slot>
-          </div>
-          <!-- Actions: Accept -->
-          <div on-click="_handleAcceptTriggerTapped">
-            <slot name="accept-trigger">
-              <button type="button" class="btn btn--call-to-action" id="accept-trigger-button">[[acceptText]]</button>
-            </slot>
-          </div>
+          
+          <template is="dom-if" if="{{_useDefaultButtons}}">
+            <!-- Actions: Reject -->
+            <div class="modal__reject-trigger" on-click="_handleRejectTriggerTapped">
+              <slot name="reject-trigger">
+                <button type="button" class="btn" id="reject-trigger-button">[[rejectText]]</button>
+              </slot>
+            </div>
+            <!-- Actions: Accept -->
+            <div on-click="_handleAcceptTriggerTapped">
+              <slot name="accept-trigger">
+                <button type="button" class="btn btn--call-to-action" id="accept-trigger-button">[[acceptText]]</button>
+              </slot>
+            </div>
+          </template>
+
+          <!--Custom Buttons-->
+          <template is="dom-if" if="{{!_useDefaultButtons}}">
+            <template is="dom-repeat" items="{{_customButtons}}" as="cBtn">
+
+              <div class$="{{cBtn.divClass}}" >
+                <slot name="custom-trigger-{{cBtn.name}}">
+                  <button type="button" class$="btn {{cBtn.btnClass}}" id="custom-trigger-button-{{cBtn.name}}" on-click="_handleCustomTriggerTapped">[[cBtn.text]]</button>
+                </slot>
+              </div>
+              
+            </template>
+          </template>
+
         </div>
       </div>
     </div>
@@ -247,7 +264,52 @@ Custom property | Description
         autoFitOnAttach: {
           type: Boolean,
           value: true
-        }
+        },
+
+        /**
+         * This property is going to allow us to switch between the default behavior and
+         * a new custom behavior to add multiple buttons
+         */
+        useDefaultButtons: {
+          type: String,
+          value: 'true',
+          observer: 'handleUseDefaultButtonsChanged'
+        },
+
+        /**
+         * Boolean version of the previous property
+         */
+        _useDefaultButtons: {
+          type: Boolean,
+          value: true,
+          notify: true
+        },
+
+        /**
+        * This object is going to hold the configuration for the custom buttons
+        * needed as string
+        */
+        customButtons: {
+          type: String, 
+          value: '',
+          notify: true,
+          observer: 'castToObject'
+        },
+
+        /**
+        * This object is going to hold the configuration for the custom buttons
+        * needed as object
+        */
+        _customButtons: {
+          type: Object,
+          value: function () {
+            return {};
+          },
+          notify: true,
+        },
+
+
+
       },
 
       observers: [
@@ -397,6 +459,34 @@ Custom property | Description
           this.unlisten(this.fitInto, 'resize', '_refit');
         }
       },
+
+      /**
+      * Fired when the user clicks on a custom button
+      * @event px-modal-custom-clicked
+      */
+      _handleCustomTriggerTapped(args) {
+
+        let btnId = args.target.id.replace('custom-trigger-button-', '');
+
+        // with the button id, we have to search the closeModal property, to see
+        // if we have to close this modal
+        let closeModal = false;
+        for (let i = 0; i < this._customButtons.length; i++) {
+          if (this._customButtons[i].name === btnId) {
+            closeModal = this._customButtons[i].closeModal;
+            break;
+          }
+        }
+
+        if (closeModal) {
+          this.opened = false;
+        }
+
+        this.fire( 'px-modal-custom-clicked', {originator:args.target.id});
+
+
+      },
+
       /**
       * Handles refitting modals that are supposed to fill a container
       * when the screen is scrolled and the container presumably moves.
@@ -407,7 +497,38 @@ Custom property | Description
             this.refit();
           }, 10);
         }
-      }
+      },
+
+      /**
+      * Handles the change of the property useDefaultBehavior
+      */
+      handleUseDefaultButtonsChanged() {
+        this._useDefaultButtons = this.useDefaultButtons === 'true';
+      },
+
+      /**
+      * Cast a jSon string to an object
+      */
+      castToObject() {
+        if (this.customButtons !== "") {
+          try {
+            this._customButtons = JSON.parse(this.customButtons);
+          } catch (err) {
+            console.log("There was an error parsing the custom buttons property" + err);
+          }
+        } else {
+          this._customButtons = {};
+        }
+
+      },
+
+      /**
+      * Method to get the string out of an object
+      */
+      _getClass( arg ) {
+        return arg.divClass; 
+      },
+
     });
 
     /*
