@@ -47,7 +47,9 @@
               open-trigger="[[openTrigger]]"
               fill-container="{{props.fillContainer.value}}"
               use-default-buttons="{{props.useDefaultButtons.value}}"
-              custom-buttons="{{props.customButtons.value}}">
+              custom-buttons="{{props.customButtons.value}}"
+              show-default-positive="{{props.showDefaultPositive.value}}"
+              >
           </px-modal>
           <px-modal-trigger trigger="{{openTrigger}}">
             <button>Open Modal</button>
@@ -136,12 +138,17 @@
 
       useDefaultButtons: {
         type: String,
-        value: 'false'
+        value: 'true'
       },
 
       customButtons: {
         type: String,
         value: '[{"divClass":"modal__reject-trigger", "name":"backToResults", "btnClass":"", "text":"< Back to Results", "closeModal":false},{"divClass":"modal__reject-trigger", "name":"addStakeholder", "btnClass":"btn--call-to-action", "text":"Add stakeholder", "closeModal":true},{"divClass":"modal__reject-trigger", "name":"addAndSearchAgain", "btnClass":"btn--call-to-action", "text":"Add & search again" , "closeModal":false}]'
+      },
+
+      showDefaultPositive: {
+        type: String,
+        value: 'false'
       },
 
       siblingElement: {

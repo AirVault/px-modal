@@ -146,17 +146,21 @@ Custom property | Description
           
           <template is="dom-if" if="{{_useDefaultButtons}}">
             <!-- Actions: Reject -->
-            <div class="modal__reject-trigger" on-click="_handleRejectTriggerTapped">
-              <slot name="reject-trigger">
-                <button type="button" class="btn" id="reject-trigger-button">[[rejectText]]</button>
-              </slot>
-            </div>
+            <template is="dom-if" if="{{_showDefaultNegative}}">
+              <div class="modal__reject-trigger" on-click="_handleRejectTriggerTapped">
+                <slot name="reject-trigger">
+                  <button type="button" class="btn" id="reject-trigger-button">[[rejectText]]</button>
+                </slot>
+              </div>
+            </template>
             <!-- Actions: Accept -->
-            <div on-click="_handleAcceptTriggerTapped">
-              <slot name="accept-trigger">
-                <button type="button" class="btn btn--call-to-action" id="accept-trigger-button">[[acceptText]]</button>
-              </slot>
-            </div>
+            <template is="dom-if" if="{{_showDefaultPositive}}">
+              <div on-click="_handleAcceptTriggerTapped">
+                <slot name="accept-trigger">
+                  <button type="button" class="btn btn--call-to-action" id="accept-trigger-button">[[acceptText]]</button>
+                </slot>
+              </div>
+            </template>
           </template>
 
           <!--Custom Buttons-->
@@ -307,6 +311,44 @@ Custom property | Description
           },
           notify: true,
         },
+
+        /**
+        * This object is going to hold the configuration if the positive button
+        * has to be shown
+        */  
+        showDefaultPositive: {
+          type: String,
+          value: 'true',
+          observer: 'handleShowDefaultPositive'
+        },
+
+        /**
+        * Boolean version of previous property
+        */
+        _showDefaultPositive: {
+          type: Boolean,
+          value: true,
+          notify: true
+        },
+
+        /**
+        * This object is going to hold the configuration if the negative button
+        * has to be shown
+        */  
+        showDefaultNegative: {
+          type: String,
+          value: 'true',
+          observer: 'handleShowDefaultNegative'
+        },
+
+        /**
+        * Boolean version of previous property
+        */
+        _showDefaultNegative: {
+          type: Boolean,
+          value: true,
+          notify: true
+        }
 
 
 
@@ -504,6 +546,20 @@ Custom property | Description
       */
       handleUseDefaultButtonsChanged() {
         this._useDefaultButtons = this.useDefaultButtons === 'true';
+      },
+
+      /**
+      * Handles the change of the property showDefaultPositive
+      */
+      handleShowDefaultPositive() {
+        this._showDefaultPositive = this.showDefaultPositive === 'true';
+      },
+
+      /**
+      * Handles the change of the property showDefaultNegative
+      */
+      handleShowDefaultNegative() {
+        this._showDefaultNegative = this.showDefaultNegative === 'true';
       },
 
       /**
